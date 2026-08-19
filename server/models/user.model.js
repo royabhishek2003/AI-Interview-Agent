@@ -2,11 +2,11 @@ import mongoose from "mongoose"
 
 const usermodel= new mongoose.Schema({
     name:{
-        type:"String",
+        type:String,
         required:true
     },
     email:{
-        type:"String",
+        type:String,
         unique:true,
         required:true
     },
@@ -14,8 +14,8 @@ const usermodel= new mongoose.Schema({
         type:Number,
         default:100
     }
-},{timestamp:true})
+},{timestamps:true})
 
-const User= mongoose.model("User","usermodel");
+const User= mongoose.model("User",usermodel);
 
 export default User;
