@@ -15,11 +15,12 @@ function Auth({isModel = false}) {
     const handleGoogleAuth = async () => {
         try {
             const response = await signInWithPopup(auth,provider)
-            let User = response.user 
+            let User = response.user
             let name = User.displayName
             let email = User.email
-            const result = await axios.post(ServerUrl + "/api/auth/google" , {name , email} , {withCredentials:true})  // cookie ke sath request jyega 
+            const result = await axios.post(ServerUrl + "/api/auth/google" , {name , email} , {withCredentials:true})
             dispatch(setUserData(result.data))
+            
             
         } catch (error) {
             console.log(error)
