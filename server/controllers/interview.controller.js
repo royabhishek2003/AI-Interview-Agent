@@ -315,7 +315,6 @@ Answer: ${answer}
 
     const aiResponse = await askAi(messages)
 
-
     const parsed = JSON.parse(aiResponse);
 
     question.answer = answer;
