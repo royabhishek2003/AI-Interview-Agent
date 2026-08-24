@@ -103,7 +103,7 @@ export const generateQuestion = async (req, res) => {
       });
     }
 
-    if (user.credits < 50) {
+    if (user.credit < 50) {
       return res.status(400).json({
         message: "Not enough credits. Minimum 50 required."
       });
@@ -157,7 +157,7 @@ Strict Rules:
 
 Difficulty progression:
 Question 1 → easy  
-Question 2 → easy  
+Question 2 → easy 
 Question 3 → medium  
 Question 4 → medium  
 Question 5 → hard  
@@ -196,7 +196,7 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
       });
     }
 
-    user.credits -= 50;
+    user.credit -= 50;
     await user.save();
 
     const interview = await Interview.create({
@@ -214,7 +214,7 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
 
     res.json({
       interviewId: interview._id,
-      creditsLeft: user.credits,
+      creditsLeft: user.credit,
       userName: user.name,
       questions: interview.questions
     });
