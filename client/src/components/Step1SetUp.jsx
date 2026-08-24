@@ -83,7 +83,7 @@ function Step1SetUp({ onStart }) {
                     initial={{ x: -80, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.7 }}
-                    className='relative bg-gradient-to-br from-green-50 to-green-100 p-12 flex flex-col justify-center'>
+                    className='relative bg-linear-to-br from-green-50 to-green-100 p-12 flex flex-col justify-center'>
 
                     <h2 className="text-4xl font-bold text-gray-800 mb-6">
                         Start Your AI Interview

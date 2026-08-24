@@ -11,9 +11,10 @@ export const analyzeResume = async (req, res) => {
     }
     const filepath = req.file.path
 
-    const fileBuffer = await fs.promises.readFile(filepath)
+    
+    const fileBuffer = await fs.promises.readFile(filepath)  // stores binary data 
     const uint8Array = new Uint8Array(fileBuffer)
-
+    // pdflibrary  understand uint8Array this format data to understand so first we convert into this format 
     const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
 
     let resumeText = "";
