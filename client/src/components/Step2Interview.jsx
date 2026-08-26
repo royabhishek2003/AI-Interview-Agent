@@ -106,19 +106,18 @@ function Step2Interview({ interviewData, onFinish }) {
       utterance.pitch = 1.05;    // small warmth
       utterance.volume = 1;
 
+      // jab ai bolne lgega tab video start krenge 
       utterance.onstart = () => {
         setIsAIPlaying(true);
         stopMic()
         videoRef.current?.play();
       };
 
-
+      // jab ai bolna band larega  tab video band hoga 
       utterance.onend = () => {
         videoRef.current?.pause();
         videoRef.current.currentTime = 0;
         setIsAIPlaying(false);
-
-
 
         if (isMicOn) {
           startMic();
@@ -179,7 +178,8 @@ function Step2Interview({ interviewData, onFinish }) {
   useEffect(() => {
     if (isIntroPhase) return;
     if (!currentQuestion) return;
-    
+    if (isAIPlaying) return;
+    // conter decreases the time left per second for each question 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -190,10 +190,10 @@ function Step2Interview({ interviewData, onFinish }) {
 
       })
     }, 1000);
-
+    // cleanup sideffect (if question changes the for the second useffect first cleaup the first one)
     return () => clearInterval(timer)
 
-  }, [isIntroPhase, currentIndex])
+  }, [isIntroPhase, currentIndex, isAIPlaying])
 
   useEffect(() => {
   if (!isIntroPhase && currentQuestion) {
@@ -202,6 +202,7 @@ function Step2Interview({ interviewData, onFinish }) {
 }, [currentIndex]);
 
 
+// it will listen the users voice and convert into the text 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) return;
 
@@ -210,13 +211,14 @@ function Step2Interview({ interviewData, onFinish }) {
     recognition.continuous = true;
     recognition.interimResults = false;
 
+    //  Tell it what to do when speech is recognized
     recognition.onresult = (event) => {
       const transcript =
         event.results[event.results.length - 1][0].transcript;
 
       setAnswer((prev) => prev + " " + transcript);
     };
-
+    // save the recognition in  recognitionRef to use this recognition in other function 
     recognitionRef.current = recognition;
 
   }, []);
@@ -262,13 +264,13 @@ function Step2Interview({ interviewData, onFinish }) {
       setFeedback(result.data.feedback)
       speakText(result.data.feedback)
       setIsSubmitting(false)
-    } catch (error) {
-console.log(error)
-setIsSubmitting(false)
+      }catch (error) {
+          console.log(error)
+          setIsSubmitting(false)
+      }
     }
-  }
 
-  const handleNext =async () => {
+  const handleNext = async () => {
     setAnswer("");
     setFeedback("");
 
