@@ -1,4 +1,4 @@
-import fs from "fs"
+
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { askAi } from "../services/openRouter.service.js";
 import User from "../models/user.model.js";
@@ -9,10 +9,9 @@ export const analyzeResume = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "Resume required" });
     }
-    const filepath = req.file.path
 
-    const fileBuffer = await fs.promises.readFile(filepath)
-    const uint8Array = new Uint8Array(fileBuffer)
+    // With memory storage, the file is in req.file.buffer (not req.file.path)
+    const uint8Array = new Uint8Array(req.file.buffer);
 
     const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
 
@@ -55,12 +54,12 @@ Return strictly JSON:
     ];
 
 
-    const aiResponse = await askAi(messages)
+    let aiResponse = await askAi(messages)
+
+    // Strip markdown code fences if present (e.g. ```json ... ```)
+    aiResponse = aiResponse.replace(/```(?:json)?\s*/gi, "").replace(/```\s*/g, "").trim();
 
     const parsed = JSON.parse(aiResponse);
-
-    fs.unlinkSync(filepath)
-
 
     res.json({
       role: parsed.role,
@@ -72,14 +71,10 @@ Return strictly JSON:
 
   } catch (error) {
     console.error(error);
-
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 
 export const generateQuestion = async (req, res) => {
@@ -312,8 +307,10 @@ Answer: ${answer}
     ];
 
 
-    const aiResponse = await askAi(messages)
+    let aiResponse = await askAi(messages)
 
+    // Strip markdown code fences if present
+    aiResponse = aiResponse.replace(/```(?:json)?\s*/gi, "").replace(/```\s*/g, "").trim();
 
     const parsed = JSON.parse(aiResponse);
 
