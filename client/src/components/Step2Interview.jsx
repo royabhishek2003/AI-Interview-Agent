@@ -405,12 +405,10 @@ function Step2Interview({ interviewData, onFinish }) {
             />
           </div>
 
-          {/* subtitle */}
-          {subtitle && (
-            <div className='w-full max-w-md bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm'>
-              <p className='text-gray-700 text-sm sm:text-base font-medium text-center leading-relaxed'>{subtitle}</p>
-            </div>
-          )}
+          {/* subtitle - always rendered to prevent layout shift */}
+          <div className={`w-full max-w-md bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm min-h-[60px] flex items-center justify-center transition-opacity duration-300 ${subtitle ? 'opacity-100' : 'opacity-0'}`}>
+            <p className='text-gray-700 text-sm sm:text-base font-medium text-center leading-relaxed'>{subtitle || '\u00A0'}</p>
+          </div>
 
 
           {/* timer Area */}
@@ -419,9 +417,9 @@ function Step2Interview({ interviewData, onFinish }) {
               <span className='text-sm text-gray-500'>
                 Interview Status
               </span>
-              {isAIPlaying && <span className='text-sm font-semibold text-emerald-600'>
-                {isAIPlaying ? "AI Speaking" : ""}
-              </span>}
+              <span className={`text-sm font-semibold text-emerald-600 transition-opacity duration-300 ${isAIPlaying ? 'opacity-100' : 'opacity-0'}`}>
+                AI Speaking
+              </span>
             </div>
 
             <div className="h-px bg-gray-200"></div>
@@ -457,7 +455,7 @@ function Step2Interview({ interviewData, onFinish }) {
           </h2>
 
 
-          {!isIntroPhase && (<div className='relative mb-6 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 shadow-sm'>
+          {!isIntroPhase && (<div className='relative mb-6 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 shadow-sm min-h-[100px]'>
             <p className='text-xs sm:text-sm text-gray-400 mb-2'>
               Question {currentIndex + 1} of {questions.length}
             </p>
@@ -475,7 +473,8 @@ function Step2Interview({ interviewData, onFinish }) {
             className="flex-1 bg-gray-100 p-4 sm:p-6 rounded-2xl resize-none outline-none border border-gray-200 focus:ring-2 focus:ring-emerald-500 transition text-gray-800" />
 
 
-         {!feedback ? ( <div className='flex items-center gap-4 mt-6'>
+         <div className='mt-6 min-h-[70px]'>
+          {!feedback ? ( <div className='flex items-center gap-4'>
             <motion.button
               onClick={toggleMic}
               whileTap={{ scale: 0.9 }}
@@ -496,7 +495,8 @@ function Step2Interview({ interviewData, onFinish }) {
             <motion.div 
              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-            className='mt-6 bg-emerald-50 border border-emerald-200 p-5 rounded-2xl shadow-sm'>
+              transition={{ duration: 0.3 }}
+            className='bg-emerald-50 border border-emerald-200 p-5 rounded-2xl shadow-sm'>
               <p className='text-emerald-700 font-medium mb-4'>{feedback}</p>
 
               <button
@@ -508,6 +508,7 @@ function Step2Interview({ interviewData, onFinish }) {
 
             </motion.div>
           )}
+          </div>
         </div>
       </div>
 
