@@ -410,6 +410,7 @@ export const getMyInterviews = async (req,res) => {
   }
 }
 
+
 export const getInterviewReport = async (req,res) => {
   try {
     const interview = await Interview.findById(req.params.id)
@@ -441,8 +442,7 @@ export const getInterviewReport = async (req,res) => {
     const avgCorrectness = totalQuestions
       ? totalCorrectness / totalQuestions
       : 0;
-
-       return res.json({
+      return res.json({
       finalScore: interview.finalScore,
       confidence: Number(avgConfidence.toFixed(1)),
       communication: Number(avgCommunication.toFixed(1)),
