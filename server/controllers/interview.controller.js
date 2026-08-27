@@ -281,7 +281,6 @@ Rules:
 
 Calculate:
 finalScore = average of confidence, communication, and correctness (rounded to nearest whole number).
-
 Feedback Rules:
 - Write natural human feedback.
 - 10 to 15 words only.
