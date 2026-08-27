@@ -11,7 +11,7 @@ import paymentRouter from "./routes/payment.route.js"
 
 const app = express()
 app.use(cors({
-    origin:"https://ai-interview-agent-1-pyik.onrender.com/",
+    origin:"https://ai-interview-agent-1-pyik.onrender.com",
     credentials:true
 }))
 
