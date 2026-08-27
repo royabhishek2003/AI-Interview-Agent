@@ -72,7 +72,6 @@ function Pricing() {
         credits: plan.credits,
       },{withCredentials:true})
       
-
       const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: result.data.amount,
@@ -104,6 +103,38 @@ function Pricing() {
      setLoadingPlan(null);
     }
   }
+
+
+
+// 1. User clicks Buy
+//         ↓
+// 2. handlePayment(plan)
+//         ↓
+// 3. Frontend → /api/payment/order
+//         ↓
+// 4. Backend creates Razorpay order
+//         ↓
+// 5. Backend → Frontend with order.id
+//         ↓
+// 6. Frontend creates Razorpay options
+//         ↓
+// 7. new window.Razorpay(options)
+//         ↓
+// 8. ⭐ rzp.open() ⭐
+//         ↓
+//    💳 RAZORPAY PAYMENT WINDOW OPENS
+//         ↓
+// 9. User enters UPI/Card/etc.
+//         ↓
+// 10. Payment completes
+//         ↓
+// 11. Razorpay calls handler(response)
+//         ↓
+// 12. Frontend → /api/payment/verify
+//         ↓
+// 13. Backend verifies payment
+//         ↓
+// 14. Credits added
 
 
 
