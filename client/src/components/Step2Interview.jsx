@@ -15,9 +15,15 @@ function Step2Interview({ interviewData, onFinish }) {
   const { interviewId, questions, userName } = interviewData;
   const [isIntroPhase, setIsIntroPhase] = useState(true);
 
-  const [isMicOn, setIsMicOn] = useState(true);
+  const [isMicOn, _setIsMicOn] = useState(true);
+  const isMicOnRef = useRef(true);
+  const setIsMicOn = (val) => { isMicOnRef.current = val; _setIsMicOn(val); };
+
   const recognitionRef = useRef(null);
-  const [isAIPlaying, setIsAIPlaying] = useState(false);
+
+  const [isAIPlaying, _setIsAIPlaying] = useState(false);
+  const isAIPlayingRef = useRef(false);
+  const setIsAIPlaying = (val) => { isAIPlayingRef.current = val; _setIsAIPlaying(val); };
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -119,9 +125,6 @@ function Step2Interview({ interviewData, onFinish }) {
         videoRef.current.currentTime = 0;
         setIsAIPlaying(false);
 
-        if (isMicOn) {
-          startMic();
-        }
         setTimeout(() => {
           setSubtitle("");
           resolve();
@@ -161,8 +164,8 @@ function Step2Interview({ interviewData, onFinish }) {
 
         await speakText(currentQuestion.question);
 
-        if (isMicOn) {
-          startMic();
+        if (isMicOnRef.current) {
+          startMic(true);
         }
       }
 
@@ -178,7 +181,7 @@ function Step2Interview({ interviewData, onFinish }) {
   useEffect(() => {
     if (isIntroPhase) return;
     if (!currentQuestion) return;
-    if (isAIPlaying) return;
+    // if (isAIPlaying) return;
     // conter decreases the time left per second for each question 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -203,29 +206,83 @@ function Step2Interview({ interviewData, onFinish }) {
 
 
 // it will listen the users voice and convert into the text 
-  useEffect(() => {
-    if (!("webkitSpeechRecognition" in window)) return;
+  const finalTranscriptRef = useRef("");
+  const isRecognizingRef = useRef(false);
+  const shouldRestartRef = useRef(true);
 
-    const recognition = new window.webkitSpeechRecognition();
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
 
     //  Tell it what to do when speech is recognized
     recognition.onresult = (event) => {
-      const transcript =
-        event.results[event.results.length - 1][0].transcript;
-
-      setAnswer((prev) => prev + " " + transcript);
+      let interimTranscript = "";
+      // Loop through all results and separate final vs interim
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscriptRef.current += " " + transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      // Update the answer with final + current interim text (live updates)
+      setAnswer((finalTranscriptRef.current + " " + interimTranscript).trim());
     };
+
+    recognition.onstart = () => {
+      isRecognizingRef.current = true;
+      shouldRestartRef.current = true;
+    };
+
+    // Auto-restart recognition if it stops unexpectedly (Chrome kills it after silence)
+    recognition.onend = () => {
+      isRecognizingRef.current = false;
+      // Only auto-restart if it was a clean stop (not aborted) and mic should be on
+      if (shouldRestartRef.current && isMicOnRef.current && !isAIPlayingRef.current) {
+        setTimeout(() => {
+          if (isMicOnRef.current && !isAIPlayingRef.current && !isRecognizingRef.current) {
+            try { recognition.start(); } catch {}
+          }
+        }, 500);
+      }
+    };
+
+    // Handle recognition errors
+    let networkErrorCount = 0;
+    recognition.onerror = (event) => {
+      console.warn("Speech recognition error:", event.error);
+      isRecognizingRef.current = false;
+      // Don't auto-restart on aborted or not-allowed — these are not recoverable
+      if (event.error === "aborted" || event.error === "not-allowed") {
+        shouldRestartRef.current = false;
+      }
+      // network errors: allow a few retries then stop (Brave browser blocks this)
+      if (event.error === "network") {
+        networkErrorCount++;
+        if (networkErrorCount >= 3) {
+          shouldRestartRef.current = false;
+          console.error("Speech recognition unavailable. If using Brave, go to brave://settings/extensions and enable 'Web Speech Recognition' under Google extensions, or use Chrome.");
+        }
+      } else {
+        networkErrorCount = 0; // reset on non-network errors
+      }
+      // no-speech is recoverable — onend will auto-restart
+    };
+
     // save the recognition in  recognitionRef to use this recognition in other function 
     recognitionRef.current = recognition;
 
   }, []);
 
 
-  const startMic = () => {
-    if (recognitionRef.current && !isAIPlaying) {
+  const startMic = (force = false) => {
+    if (recognitionRef.current && (force || !isAIPlayingRef.current) && !isRecognizingRef.current) {
       try {
         recognitionRef.current.start();
       } catch { }
@@ -272,6 +329,7 @@ function Step2Interview({ interviewData, onFinish }) {
 
   const handleNext = async () => {
     setAnswer("");
+    finalTranscriptRef.current = "";
     setFeedback("");
 
     if (currentIndex + 1 >= questions.length) {
@@ -283,7 +341,7 @@ function Step2Interview({ interviewData, onFinish }) {
 
     setCurrentIndex(currentIndex + 1);
     setTimeout(() => {
-      if (isMicOn) startMic();
+      if (isMicOnRef.current) startMic(true);
     }, 500);
 
    
@@ -409,7 +467,10 @@ function Step2Interview({ interviewData, onFinish }) {
           }
           <textarea
             placeholder="Type your answer here..."
-            onChange={(e) => setAnswer(e.target.value)}
+            onChange={(e) => {
+              setAnswer(e.target.value);
+              finalTranscriptRef.current = e.target.value;
+            }}
             value={answer}
             className="flex-1 bg-gray-100 p-4 sm:p-6 rounded-2xl resize-none outline-none border border-gray-200 focus:ring-2 focus:ring-emerald-500 transition text-gray-800" />
 
