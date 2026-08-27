@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
 const questionsSchema = new mongoose.Schema({
-  question: String,
+     question: String,
   difficulty: String,
   timeLimit: Number,
   answer: String,
   feedback: String,
   score: { type: Number, default: 0 },
   confidence: { type: Number, default: 0 },
-  communication: { type: Number, default: 0 },
-  correctness: { type: Number, default: 0 },
+communication: { type: Number, default: 0 },
+correctness: { type: Number, default: 0 },
 })
-// here we are not making sepaerate question document 
 
 
 const interviewSchema = new mongoose.Schema({
@@ -36,8 +35,6 @@ const interviewSchema = new mongoose.Schema({
     resumeText:{
      type:String
     },
-    // if had make the separate question doucment then we can store the array of object id of each question 
-    // but here we are just storing array of object and each object should look like questionsSchema or contains everyfield that is required for questionsSchema
     questions:[questionsSchema],
 
     finalScore: { type: Number, default: 0 },

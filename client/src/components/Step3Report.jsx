@@ -53,7 +53,6 @@ function Step3Report({ report }) {
   const score = finalScore;
   const percentage = (score / 10) * 100;
 
-
   // downloading pdf 
   const downloadPDF = () => {
   const doc = new jsPDF("p", "mm", "a4");

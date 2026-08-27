@@ -11,10 +11,9 @@ export const analyzeResume = async (req, res) => {
     }
     const filepath = req.file.path
 
-    
-    const fileBuffer = await fs.promises.readFile(filepath)  // stores binary data 
+    const fileBuffer = await fs.promises.readFile(filepath)
     const uint8Array = new Uint8Array(fileBuffer)
-    // pdflibrary  understand uint8Array this format data to understand so first we convert into this format 
+
     const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
 
     let resumeText = "";
@@ -103,7 +102,7 @@ export const generateQuestion = async (req, res) => {
       });
     }
 
-    if (user.credit < 50) {
+    if (user.credits < 50) {
       return res.status(400).json({
         message: "Not enough credits. Minimum 50 required."
       });
@@ -157,7 +156,7 @@ Strict Rules:
 
 Difficulty progression:
 Question 1 → easy  
-Question 2 → easy 
+Question 2 → easy  
 Question 3 → medium  
 Question 4 → medium  
 Question 5 → hard  
@@ -196,7 +195,7 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
       });
     }
 
-    user.credit -= 50;
+    user.credits -= 50;
     await user.save();
 
     const interview = await Interview.create({
@@ -214,7 +213,7 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
 
     res.json({
       interviewId: interview._id,
-      creditsLeft: user.credit,
+      creditsLeft: user.credits,
       userName: user.name,
       questions: interview.questions
     });
@@ -281,6 +280,7 @@ Rules:
 
 Calculate:
 finalScore = average of confidence, communication, and correctness (rounded to nearest whole number).
+
 Feedback Rules:
 - Write natural human feedback.
 - 10 to 15 words only.
@@ -313,6 +313,7 @@ Answer: ${answer}
 
 
     const aiResponse = await askAi(messages)
+
 
     const parsed = JSON.parse(aiResponse);
 
@@ -377,7 +378,7 @@ export const finishInterview = async (req,res) => {
     await interview.save();
 
     return res.status(200).json({
-      finalScore: Number(finalScore.toFixed(1)),
+       finalScore: Number(finalScore.toFixed(1)),
       confidence: Number(avgConfidence.toFixed(1)),
       communication: Number(avgCommunication.toFixed(1)),
       correctness: Number(avgCorrectness.toFixed(1)),
@@ -408,7 +409,6 @@ export const getMyInterviews = async (req,res) => {
      return res.status(500).json({message:`failed to find currentUser Interview ${error}`})
   }
 }
-
 
 export const getInterviewReport = async (req,res) => {
   try {
@@ -441,7 +441,8 @@ export const getInterviewReport = async (req,res) => {
     const avgCorrectness = totalQuestions
       ? totalCorrectness / totalQuestions
       : 0;
-      return res.json({
+
+       return res.json({
       finalScore: interview.finalScore,
       confidence: Number(avgConfidence.toFixed(1)),
       communication: Number(avgCommunication.toFixed(1)),

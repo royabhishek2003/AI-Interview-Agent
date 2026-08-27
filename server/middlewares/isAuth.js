@@ -13,9 +13,9 @@ const isAuth = async (req,res,next) => {
         if(!verifyToken){
             return res.status(400).json({message:"user does not have a valid token"})
         }
-        req.userId = verifyToken.userId  // taki next controller req.userId se ye pata kar sake ki current login kon hai 
+        req.userId = verifyToken.userId
 
-        next()  
+        next()
    
 
     } catch (error) {
